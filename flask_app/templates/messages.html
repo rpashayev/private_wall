@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="icon" type="images/x-icon" href="https://asset.brandfetch.io/idkwSnCpIw/ide0EyUxxa.jpeg"/>
+    <title>Messages</title>
+</head>
+<body>
+    <div class="container col-10 my-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="ms-2">Hello, <span class="ms-2 text-primary">{{current_user.first_name.title()}} </span></h1>
+            <form action="/users/logout" method="post">
+                <a href="/wall" class="btn btn-primary">Home</a>
+                <button type="submit" class="btn btn-secondary me-2">Logout</button>
+            </form>
+        </div>
+        <div class="row justify-content-between gx-0">
+            <div class="col-5">
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <h2 class="card-title text-warning">You have {{ all_messages|length }} messages</h2>
+                        {% for msg in all_messages %}
+                            <form class="text-white bg-light p-2 mb-2 border-top border-info border-2 rounded-3" action="/messages/delete" method="post">
+                                <h5 class="card-subtitle text-primary">Message from {{ msg.sender.first_name }} {{ msg.sender.last_name }}</h5>
+                                <p class="card-text text-muted">{{ msg.content }}</p>
+                                <input type="hidden" name="msg_id" value="{{ msg.id }}">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card col-5 bg-dark">
+                <div class="card-body">
+                    <h2 class="card-title text-primary">Send message</h2>
+                    {% with messages = get_flashed_messages(category_filter=["msg_error"]) %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <p class="text-danger">{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    {% for user in users %}
+                        <form class="text-light border-top border-light border-2" action="/messages/send" method="post">
+                            <label for="message" class="form-label m-0">Message to <span class="fw-bold">{{ user.first_name }} {{ user.last_name }}</span></label>
+                            <textarea class="form-control" name="content" id="message" rows="3"></textarea>
+                            
+                            <input type="hidden" class="form-control mb-1" name="receiver_id" value="{{ user.id }}">
+                            <button type="submit" class="btn btn-warning my-2">Send</button>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

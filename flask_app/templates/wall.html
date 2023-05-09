@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="icon" type="images/x-icon" href="https://asset.brandfetch.io/idkwSnCpIw/ide0EyUxxa.jpeg"/>
+    <title>Dojo Wall</title>
+</head>
+<body>
+    <div class="container col-10 my-3">
+        <div class="d-flex justify-content-between align-items-center text-white bg-dark gx-0 ">
+            <div class="d-flex">
+                <h1 class="ms-2">Hello,</h1>
+                {% if session['id'] %}
+                    <h1 class="ms-2 text-primary">{{one_user.first_name.title()}}</h1>
+                {% else %}
+                    <h1 class="text-warning ms-2">Stranger</h1>
+                {% endif %}    
+            </div>
+            {% if session['id'] %}
+                <a href="/messages" class="btn btn-primary me-2">Messages</a>
+                <form action="/users/logout" method="post">
+                    <button type="submit" class="btn btn-secondary me-2">Logout</button>
+                </form>
+            {% else %}
+                <a href="/login"> <button class="btn btn-primary me-2">Login</button></a>
+            {% endif %}
+        </div>
+            {% if session['id'] %}
+                <form class="mt-2" action="/posts/create" method="post">
+                    <label class="form-label" for="content">Create your post:</label>
+                    {% with messages = get_flashed_messages(category_filter=['post_error']) %}
+                        {% if messages %}
+                            {% for message in messages %} 
+                                <p class="text-danger">{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}                   
+                    <textarea class="form-control" name="content" id="content"></textarea>
+                    <input type="hidden" name="user_id" value="{{ session['id'] }}">
+                    <button type="submit" class="btn btn-secondary mt-1">Publish</button>
+                </form>
+            {% else %}
+                <a href="/login" class="text-danger">Please login</a>
+            {% endif %}
+        <div class="mt-4">
+            <h2 class="bg-dark text-light">All Community Posts</h2>
+            {% for post in posts %}
+                <h3 class="bg-light mt-2 border-top border-info border-2">{{ post.creator.first_name }} - {{ post.creator.created_at.strftime('%b %d, %Y') }}</h3>
+                <div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="lead ms-3">{{ post.content}}</p>
+                        {% if session['id'] == post.creator.id %}
+                            <form action="/posts/delete" method="post">
+                                <input type="hidden"name="post_id" value="{{ post.id }}"> 
+                                <button type="submit" class="btn btn-danger mt-1">Delete</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    {% for comment in post.comments %}
+                        <p class="ms-4 mb-0 fw-bold text-primary">{{ comment.creator.first_name }} - {{ comment.created_at.strftime('%b %d, %Y @%I:%M %p') }}</p>
+                        <p class="ms-5">{{ comment.content }}</p>
+                    {% endfor %}
+                    {% if session['id'] %}
+                        <form action="/posts/comments/create" method="post">
+                            <label class="form-label text-primary" for="comment"><em>post a comment:</em></label>
+                            {% with messages = get_flashed_messages(category_filter=['comment_error']) %}
+                                {% if messages %}
+                                    {% for message in messages %} 
+                                        <p class="text-danger">{{ message }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %} 
+                            <input type="text" class="form-control" name="content" id="comment" placeholder="Your comment here">
+                            <input type="hidden"name="post_id" value="{{ post.id }}"> 
+                            <button type="submit" class="btn btn-primary mt-1">Comment</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
